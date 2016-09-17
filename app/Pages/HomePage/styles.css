@@ -1,80 +1,37 @@
+.text-section {
+	margin: 3em auto;
+}
 
-.home{
-	width: 100%;
-	height: 100%
+.background{
+	width: 200px;
+	height: 248px;
+	background-image: url('./nothing.png');
 }
-.gantt{
-	width: 100%;
-	height: 860px;
-	float: left;
-}
-.charts{
-	width: 100%;
-	height: 860px;
-	padding: 5px 0;
-	background:white;
-}
-.charts>div{
-	width: 50%;
-	float: left;
-	border: solid 1px #ececec;
-	background: white;
-	padding: 0px 0px
-}
-.chart{
 
+.text-section:first-child {
+	margin-top: 0;
 }
-.chart-wrapper{
-	min-height: 420px;
-	width: 600px;
 
-}
-.chartLable{
-	color: #5584c4;
-	font-size: 16px;
-	height:30px;
-	width:360px;
-	margin:10px;
+.centered {
 	text-align: left;
-	vertical-align: middle; 
-	line-height: 30px;
-	padding-left: 20px;
-}
-.img{
-	width: 50%;
-	height: 420px;
-	float: left;
-	padding: 5px
-}
-.imgBox{
-	 width:100%;
-	 height:100%;
-	 cursor: pointer;
-}
-.task{
-	width: 50%;
-	height: 420px;
-	float: left;
-}
-.ganttBox{
-	 width:100%;
-	 height:calc(100% - 50px)
-}
-.details{
-	width: 100%;
-	height: 800px;
-	float: left;
-	padding: 10px 40px
-}
-.details p {
-	text-indent: 1cm;
-	font-size: 1.3em
 }
 
-.show{
-	display: block;
+p,
+label {
+	font-family: Georgia, Times, 'Times New Roman', serif;
+	line-height: 1.5em;
 }
 
-.hidden{
-	display: none;
+.username-form {
+	margin-bottom: 1em;
+}
+
+.input {
+	outline: none;
+	border-bottom: 1px dotted #999;
+}
+
+.at-prefix {
+	color: black;
+	margin-left: 0.4em;
 }

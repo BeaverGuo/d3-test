@@ -160,7 +160,14 @@ define("mymodule", ["dep1", "dep2"], function(d1, d2) {
   return someExportedValue;
 });
 
-功能:
+/*功能:
 webpack takes modules with dependencies and generates static assets representing those modules.
 
+git
+
+Also you can use the following command:
+
+git remote set-url origin https://BeaverGuo@github.com/BeaverGuo/d3-test.git
+git push -u origin master
+This creates (-u) another branch in your remote repo. Once the authentication using ssh is done that is.
 

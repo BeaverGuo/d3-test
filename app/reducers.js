@@ -10,11 +10,8 @@
 import { fromJS } from 'immutable';
 import { combineReducers } from 'redux-immutable';
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { changeUserInfo, users } from './Pages/SystemManaPage/reducer';
-import { changeLoginStatus } from './Pages/LoginPage/reducer';
-import appReducer from './Pages/BasePage/reducer';
-import unitPrjFill from './Pages/QualityManaPage/reducer';
-import processPlanFill from './Pages/ProgressManaPage/reducer';
+
+import homeReducer from './Pages/HomePage/reducer';
 
 const routeInitialState = fromJS({
 	locationBeforeTransitions: null,
@@ -33,13 +30,8 @@ function routeReducer(state = routeInitialState, action) {
 
 function createReducer() {
 	return combineReducers({
-		route: routeReducer,
-		changeUserInfo,
-		users,
-		changeLoginStatus,
-		unitPrjFill,
-		processPlanFill,
-		appReducer
+		routeReducer,
+		homeReducer: homeReducer,
 	});
 }
 

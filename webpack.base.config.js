@@ -9,7 +9,7 @@ module.exports = (options) => ({
     }, options.output),
     module: {
         loaders: [{
-            test: /\.(js|jsx)$/,
+            test: /\.js$/,
             loader: 'babel',
             exclude: /node_modules/,
             query: options.babelQuery,
@@ -22,9 +22,14 @@ module.exports = (options) => ({
             include: /node_modules/,
             loaders: ['style-loader', 'css-loader'],
         }, {
+            test: /\.(eot|svg|ttf|woff|woff2)$/,
+            loader: 'file-loader',
+        }, {
             test: /\.(jpg|png|gif)$/,
             loaders: [
-                'file-loader',
+                // 编译生成一个文件，并返回对应路径
+                'file-loader', 
+                // 将图片压缩
                 'image-webpack?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}',
             ],
         }, {
@@ -36,12 +41,7 @@ module.exports = (options) => ({
         }, {
             test: /\.(mp4|webm)$/,
             loader: 'url-loader?limit=10000',
-        },
-	{
-	    test: /\.(eot|woff|woff2|ttf|svg)$/,
-	    loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
-	},
-	],
+        }],
     },
     plugins: options.plugins.concat([
         new webpack.ProvidePlugin({
@@ -52,10 +52,6 @@ module.exports = (options) => ({
             'process.env': {
                 NODE_ENV: JSON.stringify(process.env.NODE_ENV),
             },
-        }),
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
         }),
     ]),
     postcss: () => options.postcssPlugins,
@@ -76,7 +72,4 @@ module.exports = (options) => ({
     target: 'web',
     stats: false,
     progress: true,
-    // externals: {
-    //     'jquery': 'window.jQuery'
-    // }
 });
