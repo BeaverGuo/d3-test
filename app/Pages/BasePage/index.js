@@ -14,7 +14,7 @@ class BasePage extends React.Component {
         return (
             <div className={styles.wrapper}>
 				<a className={styles.logoWrapper} href="###">
-					华东勘测设计研究院
+					test d3 library
 				</a>
 				{this.props.children}
 				<Footer />
