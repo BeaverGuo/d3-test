@@ -27,6 +27,7 @@ class HomePage extends React.Component {
 	};
 
 	render() {
+		debugger;
 		return (
 			<article>
 				<div>

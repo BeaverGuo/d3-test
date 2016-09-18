@@ -1364,7 +1364,7 @@ var DOMChildrenOperations = {
   /**
    * Updates a component's children by processing a series of updates. The
    * update configurations are each expected to have a `parentNode` property.
-   *
+   *为什么一定要有parentNode属性?
    * @param {array<object>} updates List of update configurations.
    * @internal
    */
@@ -10990,8 +10990,8 @@ function validatePropTypes(element) {
   }
 }
 
-var ReactElementValidator = {
-
+var ReactElementValidator = {//这个用来验证return中的对象?
+//class就是function,碰到自定义组件时是type=function的情况
   createElement: function (type, props, children) {
     var validType = typeof type === 'string' || typeof type === 'function' || type !== null && typeof type === 'object';
     // We warn in this case but don't throw. We expect the element creation to
