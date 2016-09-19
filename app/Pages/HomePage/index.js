@@ -18,6 +18,11 @@ import nothing from './nothing.png';
 //d3 library
 import * as d3 from "d3";
 
+//test for inheritage
+const ParentClass = () => {
+
+};
+
 class HomePage extends React.Component {
 	/**
 	 * set path to '/features'
