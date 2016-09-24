@@ -62,7 +62,7 @@ module.exports = require('./webpack.base.config')({
         presets: ['react-hmre'],
     },
 
-    devtool: 'cheap-module-eval-source-map',
+    devtool: 'source-map',//原来是cheap-module-eval-source-map,为能设置断点改动
 });
 
 function dependencyHandlers() {

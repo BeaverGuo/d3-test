@@ -4,7 +4,9 @@
  * at the '/features' route
  *
  */
-
+//test inheritage
+import Inheritage from '../InheriHomePage';//this does not work cause of redux?
+//test end
 import React from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
@@ -46,6 +48,7 @@ class FeaturePage extends React.Component {
 					<p>单向数据流，完备的日志记录，方便调试。</p>
 				</li>
 			</ul>
+			{/*<Inheritage />*/}
 			<Button handleRoute={this.openHomePage}>Home</Button>
 			</div>
 		);

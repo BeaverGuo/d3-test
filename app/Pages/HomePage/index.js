@@ -4,8 +4,12 @@
  * at the '/' route
  *
  */
+//test ant dropdown menu
+//import Tab from '../../Components/AntDropdownMenu';
 
-import React from 'react';
+import InheritComponent from '../InheriHomePage/testInherit';
+//testend
+import React,{ Component } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { createStructuredSelector } from 'reselect';
@@ -15,15 +19,43 @@ import Button from '../../Components/Button';
 import { default as HX } from '../../Components/HX';
 import styles from './styles.css';
 import nothing from './nothing.png';
+import 'antd/dist/antd.css';
+import { Dropdown, Icon, Menu } from "antd";
 //d3 library
 import * as d3 from "d3";
 
 //test for inheritage
-const ParentClass = () => {
-
+const ParentClass = {
+	foo:'pfoo',
+	bar:'pbar',
+	getpName(){
+		console.log(this.foo);
+	}
 };
 
+
+const SubClass = {
+	//foo:'cfoo',
+	bar:'cbar',
+	getcName(){
+		console.log(this.foo);
+	}
+}
+Object.setPrototypeOf(SubClass,ParentClass);
+//const SubClass = Object.create(ParentClass);
+SubClass.getpName();
+SubClass.getcName();
+
+
+
 class HomePage extends React.Component {
+	constructor(props){
+		super(props);
+		this.pageName = "HomePage";
+		this.state = {
+
+		};
+	}
 	/**
 	 * set path to '/features'
 	 */
@@ -31,8 +63,12 @@ class HomePage extends React.Component {
 		this.props.changeRoute('/features');
 	};
 
+	testInheritage(){
+		console.log(this.pageName);
+	}
+
 	render() {
-		debugger;
+		//debugger;
 		return (
 			<article>
 				<div>
@@ -44,8 +80,9 @@ class HomePage extends React.Component {
 						<HX.H2>this is an iframe example</HX.H2>
 						<iframe src="/iframe"></iframe>
 					</section>
-
+					<InheritComponent />
 					<Button handleRoute={this.openFeaturesPage}>Features</Button>
+
 				</div>
 			</article>
 		);
