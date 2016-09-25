@@ -80,7 +80,7 @@ class HomePage extends React.Component {
 						<HX.H2>this is an iframe example</HX.H2>
 						<iframe src="/iframe"></iframe>
 					</section>
-					<InheritComponent />
+					
 					<Button handleRoute={this.openFeaturesPage}>Features</Button>
 
 				</div>
