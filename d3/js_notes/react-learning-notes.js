@@ -354,7 +354,507 @@ Give your feedback to the React team on the functional state proposals.
 
 notes from below:
 https://medium.com/@dan_abramov
+http://jlongster.com/
 
-1).You Might Not Need Redux
 every day when you lie on the bed think about the work you've done and figure out how you can finish it more easily in shortest time and being smarter at your work! Think outside the box and keep doing this at a different point of view.
 
+moment when you need refactoring:
+1)High amount of churn
+2)Severe architectural limitations
+3)Too many things to fix(code,design,etc)
+
+Load Performance:
+1)# of HTTP requests
+2)# of bytes downloaded
+*/
+
+/*
+Many people get confused by the difference between components, their instances, and elements in React. Why are there three different terms to refer to something that is painted on screen?
+If you’re new to React, you probably only worked with component classes and instances before. For example, you may declare a Button component by creating a class. When the program is running, you may have several instances of this component on screen, each with its own properties and local state. This is the traditional object oriented UI programming. Why introduce elements?
+In this traditional UI model, it is up to you take care of creating and destroying child component instances. If a Form component wants to render a Button component, it needs to create its instance, and manually keep it up to date with any new information.
+*/
+class Form extends TraditionalObjectOrientedView {
+  render() {
+    // Read some data passed to the view
+    const { isSubmitted, buttonText } = this.attrs;
+    if (!isSubmitted && !this.button) {
+      // Form is not yet submitted. Create the button!
+      this.button = new Button({
+        children: buttonText,
+        color: 'blue'
+      });
+      this.el.appendChild(this.button.el);
+    }
+    if (this.button) {
+      // The button is visible. Update its text!
+      this.button.attrs.children = buttonText;
+      this.button.render();
+    }
+    if (isSubmitted && this.button) {
+      // Form was submitted. Destroy the button!
+      this.el.removeChild(this.button.el);
+      this.button.destroy();
+    }
+    if (isSubmitted && !this.message) {
+      // Form was submitted. Show the success message!
+      this.message = new Message({ text: 'Success!' });
+      this.el.appendChild(this.message.el);
+    }
+  }
+}
+/*
+This is pseudocode, but this is more or less what you end up with when you try to write composable UI that behaves consistently in an object oriented way with a framework like Backbone.
+Each component has to keep references to its DOM node and to the instances of the children components, and create, update, and destroy them when the time is right. The lines of code grow as the square of the number of possible states of the component, and the parents have direct access to their children component instances, making it hard to decouple them in the future.
+Now let’s talk about React.
+In React, this is where the elements come to rescue. An element is a plain object describing a component instance or DOM node and its desired properties. It contains only information about the component type (for example, a Button), its properties (for example, its color), and any child elements inside it.
+An element is not an actual instance. Rather, it is a way to tell React what you want to see on the screen. You can’t call any methods on the element. It’s just an immutable description object with two fields: type: (string | Component) and props: Object.*
+When the element’s type is a string, an element represents a DOM node with that tag name, and props correspond to its attributes. This is what React will render. For example:
+*/
+{
+  type: 'button',
+  props: {
+    className: 'button button-blue',
+    children: {
+      type: 'b',
+      children: 'OK!'
+    }
+  }
+}
+//Such an element is just a way to represent this HTML as a plain object:
+<button class='button button-blue'>
+  <b>
+    OK!
+  </b>
+</button>
+/*Note how the elements can be nested. By convention, when we want to create an element tree, we specify one or more child elements as the children prop of their containing element.
+What’s important is that both child and parent elements are just descriptions and not actual instances. They don’t refer to anything on the screen when you create them. You can create them and throw them away, and it won’t matter much.
+React Elements are easy to traverse, don’t need to be parsed, and of course are much lighter than the actual DOM elements—they’re just objects!
+However, the type of an element can also be a function or class corresponding to a React component:
+*/
+{
+  type: Button,
+  props: {
+    color: 'blue',
+    children: 'OK!'
+  }
+}
+/*
+This is the core idea of React.
+An element describing a component is also an element, just like an element describing the DOM node. They can be nested and mixed with each other.
+This feature lets you define a DangerButton component as a Button with a specific color property value without worrying about whether Button renders to a button, a div, or something else entirely.
+*/
+const DangerButton = ({ children }) => ({
+  type: Button,
+  props: {
+    color: 'red',
+    children: children
+  }
+});
+//You can mix and match them later:
+const DeleteAccount = () => ({
+  type: 'div',
+  props: {
+    children: [{
+      type: 'p',
+      props: {
+        children: 'Are you sure?'
+      }
+    }, {
+      type: DangerButton,
+      props: {
+        children: 'Yep'
+      }
+    }, {
+      type: Button,
+      props: {
+        color: 'blue',
+        children: 'Cancel'
+      }
+   }]
+});
+//Or, if you prefer JSX:
+const DeleteAccount = () => (
+  <div>
+    <p>Are you sure?</p>
+    <DangerButton>Yep</DangerButton>
+    <Button color='blue'>Cancel</Button>
+  </div>
+);
+/*This keeps components decoupled from each other, as they can express both is-a and has-a relationships exclusively through composition.
+When React sees an element with a function or class type, it will know to ask that component what element it renders to with the given props.
+When it sees
+{
+  type: Button,
+  props: {
+    color: 'blue',
+    children: 'OK!'
+  }
+}
+React will ask Button what it renders to, and it will get
+{
+  type: 'button',
+  props: {
+    className: 'button button-blue',
+    children: {
+      type: 'b',
+      children: 'OK!'
+    }
+  }
+}
+React will repeat this process until it knows the underlying DOM tag elements for every component on the page.
+React is like a child asking “what is Y” for every “X is Y” you explain to them until they figure out every little thing in the world.
+Remember the Form example above? It can be written in React as follows*:
+*/
+const Form = ({ isSubmitted, buttonText }) => {
+  if (isSubmitted) {
+    // Form submitted! Return a message element.
+    return {
+      type: Message,
+      props: {
+        text: 'Success!'
+      }
+    };
+  }
+  // Form still visible! Return a button element.
+  return {
+    type: Button,
+    props: {
+      children: buttonText,
+      color: 'blue'
+    }
+  };
+};
+/*
+That’s it! For a React component, props are the input, and an element tree is the output.
+The returned element tree can contain both elements describing DOM nodes, and elements describing other components. This lets you compose independent parts of UI without relying on their internal DOM structure.
+We let React create, update, and destroy instances. We describe them with elements we return from the components, and React takes care of managing the instances.
+In the code above, Form, Message, and Button are React components. They can either be written as functions, as above, or as classes descending from React.Component:
+class Button extends React.Component {
+  render() {
+    const { children, color } = this.props;
+    // Return an element describing a
+    // <button><b>{children}</b></button>
+    return {
+      type: 'button',
+      props: {
+        className: 'button button-' + color,
+        children: {
+          type: 'b',
+          props: {
+            children: children
+          }
+        }
+      }
+    };
+  }
+}
+When a component is defined as a class, it is a little more powerful than a functional component. It can store some local state and perform custom logic when the corresponding DOM node is created or destroyed. A functional component is less powerful but is simpler, and it acts like a class component with just a single render() method.
+However, whether functions or classes, fundamentally they are all components to React. They take the props as their input, and return the elements as their output.
+When you call
+ReactDOM.render({
+  type: Form,
+  props: {
+    isSubmitted: false,
+    buttonText: 'OK!'
+  }
+}, document.getElementById('root'));
+React will ask the Form component what element tree it returns, given those props. It will gradually “refine” its understanding of your component tree in terms of simpler primitives:
+// React: You told me this...
+{
+  type: Form,
+  props: {
+    isSubmitted: false,
+    buttonText: 'OK!'
+  }
+}
+// React: ...And Form told me this...
+{
+  type: Button,
+  props: {
+    children: 'OK!',
+    color: 'blue'
+  }
+}
+// React: ...and Button told me this! I guess I'm done.
+{
+  type: 'button',
+  props: {
+    className: 'button button-blue',
+    children: {
+      type: 'b',
+      props: {
+        children: 'OK!'
+      }
+    }
+  }
+}
+At the end of this process React knows the result DOM tree, and a renderer like ReactDOM or React Native applies the minimal set of changes necessary to update the actual DOM nodes.
+This gradual refining process is also the reason React apps are easy to optimize. If some parts of your component tree become too large for React to visit efficiently, you can tell it to skip this “refining” and diffing certain parts of the tree if the relevant props have not changed. It is very fast to calculate whether the props have changed if they are immutable, so React and immutability work great together, and can provide great optimizations with the minimal effort.
+You might have noticed that I have talked a lot about components and elements, and not so much about the instances. The truth is, instances have much less importance in React than in most object oriented UI frameworks.
+Only components declared as classes have instances, and you never create them directly: React does that for you. While there are mechanisms for a parent component instance to access a child component instance, they are only used for imperative actions (such as setting focus on a field), and should generally be avoided.
+React will take care of creating an instance for every class component, so that you can write components in an object oriented way with methods and local state, but other than that, instances are not very important in the React’s programming model, and are managed by React itself.
+Recap
+An element is a plain object describing what you want to appear on the screen in terms of the DOM nodes or other components. Elements can contain other elements in their props.
+A component can be two things. It can be a class with a render() method that inherits from React.Component . Or it can be a function. In both cases, it takes props as an input, and returns an element tree as the output.
+When a component receives some props as an input, it is because a parent component returned an element with its type and these props. This is why people say that the props flows one way in React: from parents to children.
+An instance is what you refer to as this in the component class you write. It is useful for storing local state and reacting to the lifecycle events.
+Functional components don’t have instances at all. Class components have instances, but you never need to create a component instance directly—React takes care of this.
+Finally, to create elements, use React.createElement(), JSX, or an element factory helper. I discourage you from writing them as plain objects in the real code—just know that they are plain objects under the hood.
+
+There is a growing sentiment in the JavaScript community that ES6 classes are not awesome:
+Classes obscure the prototypal inheritance at the core of JS.
+Classes encourage inheritance but you should prefer composition.
+Classes tend to lock you into the first bad design you came up with.
+I think it’s great that the JavaScript community is paying attention to the problems caused by the use of classes and inheritance, but I’m worried that the beginners are confused as classes are both “bad” and were just added to the language. Even more confusingly, some libraries, notably React, use ES6 classes all over its documentation. Is React intentionally following “bad practices”?
+I think we’re in a weird transitional period where the widespread usage of classes is a necessary evil because they are limiting. They are certainly better than learning a new ad-hoc class system that comes with every framework, each with its own way of multiple inheritance in form of mixins.
+If you like functional programming, you might see how transitioning from proprietary class systems to the “stripped down” ES6 classes (no mixins, no autobinding, etc) moves us a step closer towards the functional solutions.
+In the meantime, here is how to use classes and sleep at night:
+Resist making classes your public API. (Of course exporting React components is an exception as they aren’t used directly.) You can always hide your classes behind the factory functions. If you expose them, people will inherit from them in all sorts of ways that make zero sense to you, but that you may break in the future. Avoiding breaking people’s classes is hard because they might use the method names you want to use in the future versions, they might read your private state, they might put their own state onto your instances, and they might override your methods without calling super which may work for a while if they’re lucky but break later. That said, when there isn’t back-and-forth interaction between the base class and the user’s derived classes, such as in case of React components, exposing a base class may very well be a valid API choice.
+Don’t inherit more than once. Inheritance can be handy as a shortcut, and inheriting once is um-kay, but don’t go deeper. The problem with inheritance is that the descendants have too much access to the implementation details of every base class in the hierarchy, and vice versa. When the requirements change, refactoring a class hierarchy is so hard that it turns into a WTF sandwich with traces of outdated requirements. Instead of creating a class hierarchy, consider creating several factory functions. They may call each other in chain, tweaking the behavior of each other. You may also teach the “base” factory function to accept a “strategy” object modulating the behavior, and have the other factory functions provide it. Regardless of the approach you choose, the important part is to keep inputs and outputs explicit at every step. “You need to override a method” is not an explicit API and is hard to design well, but “you need to provide a function as an argument” is explicit and helps you think it through.
+Don’t make super calls from methods. If you override a method in a derived class, override it completely. Tracing a sequence super calls is like following a series of notes hidden around the world by a movie villain. It’s only fun when you watch someone else doing it. What if you really need to transform the result of the super method, or perform it before or after doing something else? See the previous point: turn your classes into the factory functions and keep the relationships between them very explicit. When your only tools are parameters and return values, it’s easier to discover the right balance of responsibilities. The intermediate functions can have different (and more fine-grained) interfaces than the “top-level” and “bottom-level” functions. Classes don’t easily provide such mechanisms because you can’t designate a method “for the use of base class only” or “for the use of derived class only”, but functional composition makes it natural.
+Don’t expect people to use your classes. Even if you choose to provide your classes as a public API, prefer duck typing when accepting inputs. Instead of instanceof checks, assert the existence of the methods you plan to use, and trust the user to do the right thing. This will make userland extensions and later tweaks easier, as well as eliminate the issues with iframes and different JavaScript execution contexts.
+Learn functional programming. It will help you not think in classes, so you won’t be compelled to use them even though you know their pitfalls.
+So What About React Components?
+I hope that the rules above show why this is a terrible idea:
+import { Component } from 'react';
+class BaseButton extends Component {
+  componentDidMount() {
+    console.log('hey');
+  }
+  render() {
+    return <button>{this.getContent()}</button>;
+  }
+}
+class RedButton extends BaseButton {
+  componentDidMount() {
+    super.componentDidMount();
+    console.log('ho');
+  }
+  getContent() {
+    return 'I am red';
+  }
+  render() {
+    return (
+      <div className='red'>
+        {super.render()}
+      </div>
+    );
+  }
+}
+However I say that the code below is just fine.
+import { Component } from 'react';
+class Button extends Component {
+  componentDidMount() {
+    console.log('hey');
+  }
+  render() {
+    return (
+      <div className={this.props.color}>
+        <button>{this.props.children}</button>
+      </div>
+    );
+  }
+}
+class RedButton extends Component {
+  componentDidMount() {
+    console.log('ho');
+  }
+  render() {
+    return (
+      <Button color='red'>
+        I am red
+      </Button>
+    );
+  }
+}
+Yes, we used the dreaded class keyword but we didn’t create a hierarchy, as we always extended Component. And you can write lint rules for that, if you wish so. There is no need to jump through the hoops just to avoid using the class keyword in the code above. It’s not a real issue.
+When you want to supply a component with some additional functionality in a generic way, higher order components cover pretty much every use case I have encountered so far. Technically they are just higher order functions.
+After discovering higher order components, I haven’t felt the need for either createClass()-style mixins, proposed-for-ES7 mixins, “stamp composition”, or any other composition solution. This is another argument in favor of just using class — because you don’t realistically need anything “more powerful”.
+As of React 0.14 you can write the components as pure functions. This is totally worth doing. Any time you can write a function instead of a class, do.
+However, when you need the lifecycle hooks or state, until React settles on some purely functional solution, I see no harm in using classes given that you don’t break the rules above. In fact it will be easier to migrate from ES6 classes to a purely functional approach than from anything else.
+I am thus concerned about using “compositional solutions” that don’t directly harness React’s composition model, as in my view it’s a step back and conceptually is closer to mixins that don’t make sense in the functional paradigm.
+So what are my recommendations for React components?
+You can use class in your JS if you don’t inherit twice and don’t use super.
+Prefer to write React components as pure functions when possible.
+Use ES6 classes for components if you need the state or lifecycle hooks.
+In this case, you may only extend React.Component directly.
+Give your feedback to the React team on the functional state proposals.
+
+Inventing on  principle:
+Creators need immediately connection to what they create.If you make a change/descision,see the change immediately.这样能产生更多的ideas,try ideas as you think of them.
+Larry's principle:nomodes
+Insight.try many things and gain experiences.
+
+my twitter account:
+lalabeaver21@gmail.com
+
+
+1)container component pattern.
+Re-renders
+shouldComponentUpdate(){
+    return false;
+}
+PureRender mixin
+var PureRenderMixin =  React.addons.PureRenderMixin;
+React.createClass({
+    mixins:[PureRenderMixin],
+});
+
+Data comparability
+shallow comparision,super fast 但是复杂情况下并不好比较或者不可能比较,如2个函数
+shouldComponentUpdate(nextProps, nextState) {
+    return (
+        !shallowEqual(this.props, nextProps) ||
+        !shallowEqual(this.state, nextState)
+    );
+}
+
+loosely coupled
+component hierarchy
+<OuterScroller scrollTop={props.offsetTop}>
+    <InnerTable width="123" style="blue" />
+</OuterScroller>
+
+childern create deep update trees.
+children change over time.
+children are expensive.
+var Parent = React.createClass({
+    shouldComponentUpdate(nextProps){
+        return this.props.children !== nextProps.children;
+    },
+    render(){
+        return <section>{this.props.children}</section>;
+    }
+});
+
+setInterval(()=>React.render(
+    <Parent>
+        <div>child</div>
+    </Parent>,
+    document.body
+),1);
+
+Independent children
+
+var StaticTwoColumnSplit = React.createClass({
+    shouldComponentUpdate(nextProps){
+        return false;
+    },
+    render(){
+        return (
+            <div>
+                <FloatLeft>{this.props.children[0]}</FloatLeft>
+                <FloatRight>{this.props.children[1]}</FloatRight>
+            </div>
+        );
+    }
+});
+
+<AdsApp width={props.width}>
+    <Header />
+    <StaticTwoColumnSplit>
+        <TargetingContainer />
+        <BudgetWidgetContainer />
+    </StaticTwoColumnSplit>
+</AdsApp>
+
+Containers vs. components
+<BudgetWidgetContainer />  <----->  <BudgetWidget value={...} />
+    talks to stores                  renders markup可复用
+这样的话可以将parent和children解耦,使用childless containers直接从store获取数据,从而避免整个tree rerendering
+A container does data fetching and then renders its corresponding sub-component. That’s it.
+Why containers?
+Say you have a component that displays comments. You didn’t know about container components. So, you put everything in one place:
+// CommentList.js
+class CommentList extends React.Component {
+  constructor() {
+    super();
+    this.state = { comments: [] }
+  }
+  componentDidMount() {
+    $.ajax({
+      url: "/my-comments.json",
+      dataType: 'json',
+      success: function(comments) {
+        this.setState({comments: comments});
+      }.bind(this)
+    });
+  }
+  render() {
+    return <ul> {this.state.comments.map(renderComment)} </ul>;
+  }
+  renderComment({body, author}) {
+    return <li>{body}—{author}</li>;
+  }
+}
+Your component is responsible for both fetching data and presenting it. There’s nothing “wrong” with this but you miss out on a few benefits of React.
+Reusability
+CommentList can’t be reused unless under the exact same circumstances.
+Data structure
+Your markup components should state expectations of the data they require. PropTypes are great for this.
+Our component is opinionated about data structure but has no way of expressing those opinions. This component will break silently if the json endpoint change.
+First, lets pull out data-fetching into a container component.
+// CommentListContainer.js
+class CommentListContainer extends React.Component {
+  constructor() {
+    super();
+    this.state = { comments: [] }
+  }
+  componentDidMount() {
+    $.ajax({
+      url: "/my-comments.json",
+      dataType: 'json',
+      success: function(comments) {
+        this.setState({comments: comments});
+      }.bind(this)
+    });
+  }
+  render() {
+    return <CommentList comments={this.state.comments} />;
+  }
+}
+Now, let’s rework CommentList to take comments as a prop.
+// CommentList.js
+class CommentList extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() { 
+    return <ul> {this.props.comments.map(renderComment)} </ul>;
+  }
+  renderComment({body, author}) {
+    return <li>{body}—{author}</li>;
+  }
+}
+
+We’ve separated our data-fetching and rendering concerns.
+We’ve made our CommentList component reusable.
+We’ve given CommentList the ability to set PropTypes and fail loudly.
+
+My presentational components:
+Are concerned with how things look.
+May contain both presentational and container components** inside, and usually have some DOM markup and styles of their own.
+Often allow containment via this.props.children.
+Have no dependencies on the rest of the app, such as Flux actions or stores.
+Don’t specify how the data is loaded or mutated.
+Receive data and callbacks exclusively via props.
+Rarely have their own state (when they do, it’s UI state rather than data).
+Are written as functional components unless they need state, lifecycle hooks, or performance optimizations.
+Examples: Page, Sidebar, Story, UserInfo, List.
+
+My container components:
+Are concerned with how things work.
+May contain both presentational and container components** inside but usually don’t have any DOM markup of their own except for some wrapping divs, and never have any styles.
+Provide the data and behavior to presentational or other container components.
+Call Flux actions and provide these as callbacks to the presentational components.
+Are often stateful, as they tend to serve as data sources.
+Are usually generated using higher order components such as connect() from React Redux, createContainer() from Relay, or Container.create() from Flux Utils, rather than written by hand.
+Examples: UserPage, FollowersSidebar, StoryContainer, FollowedUserList.
+I put them in different folders to make this distinction clear.
+
+Benefits of This Approach
+Better separation of concerns. You understand your app and your UI better by writing components this way.
+Better reusability. You can use the same presentational component with completely different state sources, and turn those into separate container components that can be further reused.
+Presentational components are essentially your app’s “palette”. You can put them on a single page and let the designer tweak all their variations without touching the app’s logic. You can run screenshot regression tests on that page.
+This forces you to extract “layout components” such as Sidebar, Page, ContextMenu and use this.props.children instead of duplicating the same markup and layout in several container components.
+Remember, components don’t have to emit DOM. They only need to provide composition boundaries between UI concerns.
