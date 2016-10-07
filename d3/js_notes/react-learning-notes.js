@@ -351,3 +351,10 @@ Prefer to write React components as pure functions when possible.
 Use ES6 classes for components if you need the state or lifecycle hooks.
 In this case, you may only extend React.Component directly.
 Give your feedback to the React team on the functional state proposals.
+
+notes from below:
+https://medium.com/@dan_abramov
+
+1).You Might Not Need Redux
+every day when you lie on the bed think about the work you've done and figure out how you can finish it more easily in shortest time and being smarter at your work! Think outside the box and keep doing this at a different point of view.
+
