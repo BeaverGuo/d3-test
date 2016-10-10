@@ -858,3 +858,47 @@ Better reusability. You can use the same presentational component with completel
 Presentational components are essentially your app’s “palette”. You can put them on a single page and let the designer tweak all their variations without touching the app’s logic. You can run screenshot regression tests on that page.
 This forces you to extract “layout components” such as Sidebar, Page, ContextMenu and use this.props.children instead of duplicating the same markup and layout in several container components.
 Remember, components don’t have to emit DOM. They only need to provide composition boundaries between UI concerns.
+*/
+
+componentWillReceiveProps(nextProps){
+  console.log("kkkk");
+  let pk = nextProps.params.id;//这里不用nextProps用this.props...就会取到上一次的参数
+  console.log(pk);
+  Api.getCell(pk).then((data)=>{
+      console.log('part',data);
+      data.children_wp.map((val,index)=>{
+        val.index = index + 1;
+        val.PTRName = data.name;
+        val.PTRCode = data.code;
+        return val;
+      });
+      this.setState({
+    ITMdata:data.children_wp
+      });
+  }).catch((err)=>{
+      console.log('error');
+  });
+}
+
+//setState
+setState(function(previousState, currentProps) {
+  return {myInteger: previousState.myInteger + 1};
+});
+
+onPartChange(e,val){
+    //console.log(e.target.checked,val);
+    if(e.target.checked){
+      this.setState((prevState,curProps)=>{
+        prevState.selParts.push(val);
+        return {selParts:prevState.selParts}
+      });
+    }
+    else{
+      this.setState((prevState,curProps)=>{
+        return {selParts:prevState.selParts.filter((cur)=>(cur.code !== val.code))}
+      });
+    } 
+}
+
+
+
