@@ -59,3 +59,130 @@ const ConnectedCounter = connect(
     }
   })
 )(Counter)
+
+
+
+
+//flow promise problem
+//提交流程helper funciton
+    flowHelper(divdat,name,pk0,pk1,pk2,bIsThree,FTindex,pkArr,pk3){
+      let FT,
+        curUsr = JSON.parse(sessionStorage.getItem("userInfo")),
+        promiseArr = [];
+      switch(FTindex){
+        case 1:
+        promiseArr = this.changeFlowStatus(pkArr);
+        FT = ft.unitProjFlow;
+        break;
+        case 2:
+        promiseArr = this.changeFlowStatus1(pkArr);
+        FT = ft.processFlow;
+        break;
+        case 3:
+        promiseArr = this.changeFlowStatus2(pkArr);
+        FT = ft.processFlow;
+            break;
+        case 4:
+        promiseArr = this.changeFlowStatus3(pkArr);
+        FT = ft.qualityTableFlow;
+            break;
+            case 5:
+            promiseArr = this.changeFlowStatus4(pkArr);
+            FT = ft.yearPlanFlow;
+            break;
+            case 6:
+            promiseArr = this.changeFlowStatus5(pkArr);
+            FT = ft.yearPlanFlow;
+            break;
+            case 7:
+            promiseArr = this.changeFlowStatus6(pkArr);
+            FT = ft.drawingFlow;
+            break;
+        default:
+        break;
+      }
+      if(typeof divdat == 'string'){
+        if(!pk0 || !pk1){
+          message.info('请选择人员！');
+          return;
+        }
+      //submit to flow
+      let data = {
+          id:divdat,
+          name:name,
+          description: "",
+          subject:pkArr
+        };
+
+      console.log(pk0,pk1,pk2);
+      let executors = [[curUsr.id],[pk0],[pk1]];
+      console.log(data,executors,FT);
+            //let promiseArr = this.changeFlowStatus([divdat]);
+            Promise.all(promiseArr).then((cur)=>{
+                FlowTrans.newFlow(data,FT,executors).then((data)=>{
+                    message.success("流程开启成功");
+                    console.log(data);
+                }).catch((err)=>{
+                    message.error("流程开启失败");
+                    console.log("error",err);
+                });
+            }).catch((err)=>{
+                message.error("流程开启失败");
+                console.log("error",err);
+            });
+      
+      }
+      else{
+        let executors = [[curUsr.id],[pk0],[pk1]];
+        if(!this.bIsNotEmpty(divdat)){
+          message.info('请选择分项工程！');
+          return;
+        }
+        if(bIsThree){
+          if(!pk0 || !pk1 || !pk2){
+            message.info('请选择人员！');
+            return ;
+          }
+          executors = [[curUsr.id],[pk0],[pk1],[pk2]];
+        }
+        if(FTindex == 4 && !pk3){
+          message.info('请选择监理人员！');
+          return;
+        }else{
+          executors = [[curUsr.id],[pk0],[pk1],[pk2],[pk3]];
+        }
+          
+        if(!pk0 || !pk1){
+          message.info('请选择人员！');
+          return;
+        }
+      //submit to flow
+      let data = {
+        id:divdat.pk,
+        name:name,
+        description: "",
+      };
+            //let promiseArr = this.changeFlowStatus(pkArr);
+            return Promise.all(promiseArr).then((cur)=>{   //that's the point!!!!!!!!!!!!!
+                data.subject = pkArr;
+                console.log(pk0,pk1,pk2);
+                console.log(data,executors);
+                const p2 = new Promise((resolve, reject) => {
+                    FlowTrans.newFlow(data,FT,executors).then((dat)=>{
+                        message.success("流程开启成功");
+                        console.log(dat);
+                        resolve(dat);
+                    }).catch((err)=>{
+                        message.error("流程开启失败");
+                        console.log("error",err);
+                    });
+                });
+                return p2;
+            }).catch((err)=>{
+                message.error("流程开启失败");
+                console.log("error",err);
+            });
+      
+      }
+    
+    }

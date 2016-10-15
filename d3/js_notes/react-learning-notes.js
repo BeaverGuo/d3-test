@@ -900,5 +900,88 @@ onPartChange(e,val){
     } 
 }
 
+//传递this
+let passWPThis = this;
+let bNormal = this.TabOperate.submit(this.props.unitPrjData,this.props.code,pk0,pk1,pk2,pk3,this.props.suffix,passWPThis);
 
 
+//顺序问题
+handleSubmit(currentSeq){
+    if(currentSeq == 4){
+      let flow = this.check.checkObj(this.props.flowData);
+      let sj = JSON.parse(flow.subject_json);
+      let promiseArr = this.check.endFlowStatus3(sj);
+      Promise.all(promiseArr).then((val)=>{
+        const {advice,time} = this.getAdviceTime(currentSeq);
+        //console.log(this.state.id,advice);
+        this.check.approvedFlow(this.state.id,advice).then((val)=>{
+          console.log("1",val);
+          this.check.loadTaskTree(null,this.props.onChangeUserTask,true).then((curDat)=>{//这个没执行，是promise.all的问题还是then的问题
+            console.log("2",curDat);
+            this.check.updateFlowDat(this.state.id,this.props.onSetFlowData);
+          });//这个暂时没起作用,后面再看
+        });
+        
+      }).catch((err)=>{
+        console.log("error");
+      });
+    }
+    else{
+      const {advice,time} = this.getAdviceTime(currentSeq);
+      //console.log(this.state.id,advice);
+      this.check.approvedFlow(this.state.id,advice).then((val)=>{
+        console.log("1",val);
+      });
+      this.check.loadTaskTree(null,this.props.onChangeUserTask,true).then((curDat)=>{
+          console.log("2",curDat);
+          this.check.updateFlowDat(this.state.id,this.props.onSetFlowData);
+        });//这个暂时没起作用,后面再看
+    }
+    
+  }
+
+
+  //原来是这个没 有resolve
+  //审核通过
+    approvedFlow(pk,note){
+      const p2 = new Promise((resolve, reject) => {
+        FlowTrans.logEvent(pk,note).then((data)=>{
+          message.success("流程审批成功");
+          console.log(data);
+        }).catch((err)=>{
+          message.error("流程审批失败");
+          console.log("error",error);
+        });
+      });
+      return p2;
+    }
+
+
+
+    handleSubmit(currentSeq){
+    let self = this;
+    if(currentSeq == 4){
+      let flow = this.check.checkObj(this.props.flowData);
+      let sj = JSON.parse(flow.subject_json);
+      let promiseArr = this.check.endFlowStatus3(sj);
+      Promise.all(promiseArr).then((val)=>{
+        const {advice,time} = this.getAdviceTime(currentSeq);
+        //console.log(this.state.id,advice);
+        this.check.approvedFlow(this.state.id,advice).then((val)=>{
+          console.log(val);
+          this.check.updateTaskFlow(self);
+        }); 
+      }).catch((err)=>{
+        console.log("error");
+      });
+    }
+    else{
+      const {advice,time} = this.getAdviceTime(currentSeq);
+      //console.log(this.state.id,advice);
+      this.check.approvedFlow(this.state.id,advice).then((val)=>{
+        console.log(val);
+        this.check.updateTaskFlow(self);
+      });
+    }
+    
+  }
