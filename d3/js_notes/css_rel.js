@@ -58,3 +58,8 @@ select option:disabled {
 
 4.disable whole div
 $("#test *").attr("disabled", "disabled").off('click');
+
+5.git
+git config --global user.name "My Name"
+git config --global user.email "myemail"
+git config --global GitHub.user myusername

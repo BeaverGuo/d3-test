@@ -1,0 +1,1 @@
+/*What makes React important is the shift from global, template-based layouts to distinct, data-driven components.

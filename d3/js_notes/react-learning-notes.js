@@ -988,8 +988,74 @@ handleSubmit(currentSeq){
 
 
 
+<<<<<<< HEAD
   shouldComponentUpdate(nextProps) {
   const currentProps = _.pick(this.props, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
   const otherProps = _.pick(nextProps, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
   return !_.isEqual(currentProps, otherProps);
+=======
+  //父组件调用子组件的方法用ref
+  var Todo = React.createClass({
+  render: function() {
+    return <div onClick={this.props.onClick}>{this.props.title}</div>;
+  },
+
+  //this component will be accessed by the parent through the `ref` attribute
+  animate: function() {
+    console.log('Pretend %s is animating', this.props.title);
+  }
+});
+
+var Todos = React.createClass({
+  getInitialState: function() {
+    return {items: ['Apple', 'Banana', 'Cranberry']};
+  },
+
+  handleClick: function(index) {
+    var items = this.state.items.filter(function(item, i) {
+      return index !== i;
+    });
+    this.setState({items: items}, function() {
+      if (items.length === 1) {
+        this.refs.item0.animate();
+      }
+    }.bind(this));
+  },
+
+  render: function() {
+    return (
+      <div>
+        {this.state.items.map(function(item, i) {
+          var boundClick = this.handleClick.bind(this, i);
+          return (
+            <Todo onClick={boundClick} key={i} title={item} ref={'item' + i} />
+          );
+        }, this)}
+      </div>
+    );
+  }
+});
+
+ReactDOM.render(<Todos />, mountNode);
+Alternatively, you could have achieved this by passing the todo an isLastUnfinishedItem prop, let it check this prop in componentDidUpdate, then animate itself; however, this quickly gets messy if you pass around different props to control animations.
+
+class Parent extends Component {
+ render() {
+  return (
+    <div>
+      <Child ref="child" />
+      <button onClick={() => this.refs.child.childMethod()}>Click</button>
+    </div>
+  );
+ }
+}
+
+class Child extends Component {
+  childMethod(){
+    //...
+  }
+  render(){
+    return <h1>Child</h1>
+  }
+>>>>>>> facc0bd16184510597116704cb71f99fdeb112b5
 }
