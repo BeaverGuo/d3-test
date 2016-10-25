@@ -985,3 +985,11 @@ handleSubmit(currentSeq){
     }
     
   }
+
+
+
+  shouldComponentUpdate(nextProps) {
+  const currentProps = _.pick(this.props, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
+  const otherProps = _.pick(nextProps, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
+  return !_.isEqual(currentProps, otherProps);
+}
