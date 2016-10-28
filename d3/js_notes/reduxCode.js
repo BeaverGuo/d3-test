@@ -186,3 +186,11 @@ const ConnectedCounter = connect(
       }
     
     }
+
+
+/*自己注册的事件需要自己进行内存管理,在render里面bind(this)后的函数是一个新的函数,不是原来的函数
+在constructor里面的是原来的,这样就能释放掉原来组件绑定的事件,而不会每次render组件时找不到原来的事件
+这样注册的事件会越来越多,导致内存泄漏
+
+I had the same issue with the demo8 (draggable list) because of event listeners set up in componentDidMount().
+I fixed that adding removeEventListener in componentWillUnmount()
