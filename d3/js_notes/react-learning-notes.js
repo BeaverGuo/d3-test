@@ -987,13 +987,11 @@ handleSubmit(currentSeq){
   }
 
 
-
-<<<<<<< HEAD
   shouldComponentUpdate(nextProps) {
   const currentProps = _.pick(this.props, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
   const otherProps = _.pick(nextProps, 'defaultValue', 'initialValue', 'valid', 'active', 'touched', 'value');
   return !_.isEqual(currentProps, otherProps);
-=======
+  }
   //父组件调用子组件的方法用ref
   var Todo = React.createClass({
   render: function() {
@@ -1057,5 +1055,4 @@ class Child extends Component {
   render(){
     return <h1>Child</h1>
   }
->>>>>>> facc0bd16184510597116704cb71f99fdeb112b5
 }
