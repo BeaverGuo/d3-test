@@ -1,5 +1,5 @@
 
-
+1.render部分
 
 //react code review:
 var createElement = ReactElement.createElement;
@@ -19,7 +19,7 @@ if ("development" !== 'production') {
     );
 }
 比如要渲染：<HX.H2>simple biolerplate</HX.H2>
-这里H2里的HTML可通过children取到*/
+这里H2里的HTML可通过this.props.children取到,children是包含在<name></name>里面的东西,可以是组件也可以不是*/
 
 var ReactElementValidator = {//render就跑这里来了,这个用来验证return中的对象?
 //class就是function,碰到自定义组件时是type=function的情况
@@ -588,4 +588,64 @@ function validateChildKeys(node, parentType) {
       }
     }
   }
+}
+
+
+
+2.redux部分
+/**
+ * This middleware captures CALL_HISTORY_METHOD actions to redirect to the
+ * provided history object. This will prevent these actions from reaching your
+ * reducer or any middleware that comes after this one.
+ */
+function routerMiddleware(history) {
+  return function () {
+    return function (next) {
+      return function (action) {
+        if (action.type !== _actions.CALL_HISTORY_METHOD) {
+          return next(action);
+        }
+
+        var _action$payload = action.payload;
+        var method = _action$payload.method;
+        var args = _action$payload.args;
+
+        history[method].apply(history, _toConsumableArray(args));
+      };
+    };
+  };
+}
+
+
+//3.helper function
+
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+var MAX_SAFE_INTEGER = 9007199254740991;
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+ var funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]';
+var objectToString = objectProto.toString;
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+  var tag = isObject(value) ? objectToString.call(value) : '';
+  return tag == funcTag || tag == genTag;
 }
