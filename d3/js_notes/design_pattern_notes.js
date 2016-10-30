@@ -33,3 +33,62 @@ a subclass of View. CompositeView objects act just like View objects; a composit
 view can be used wherever a view can be used, but it also contains and manages 
 nested views.
 
+Composite (183) design pattern. It lets you create a class hierarchy in which 
+some subclasses define primitive objects (e.g., Button) and other classes define 
+composite objects (CompositeView) that assemble the primitives into more complex 
+objects. 
+组合优于继承
+MVC also lets you change the way a view responds to user input without changing 
+its visual presentation. You might want to change the way it responds to the keyboard, 
+for example, or have it use a pop-up menu instead of command keys. MVC encapsulates 
+the response mechanism in a Controller object. There is a class hierarchy of 
+controll
+
+ For example, 
+a view can be disabled so that it doesn't accept input simply by giving it a 
+controller that ignores input events.
+
+MVC uses other design patterns, such as Factory Method (121) to specify the default 
+controller class for a view and Decorator (196) to add scrolling to a view. But 
+the main relationships in MVC are given by the Observer, Composite, and Strategy 
+design patterns. 
+
+first criterion of design pattern:
+purpose:creational,structural or behavioral purpose
+创建，组合，行为
+ Creational patterns concern the process of 
+object creation. Structural patterns deal with the composition of classes or 
+objects. Behavioral patterns characterize the ways in which classes or objects 
+interact and distribute responsibility. 
+
+second criterion of design pattern:
+scope: specify whether the pattern applies to classes or objects.
+Class patterns deal with relationships between 
+classes and their subclasses. These relationships are established through 
+inheritance, so they are static—fixed at compile-time. Object patterns deal with 
+object relationships, which can be changed at run-time and are more dynamic. Almost 
+all patterns use inheritance to some extent. So the only patterns labeled "class 
+patterns" are those that focus on class relationships. Note that most patterns 
+are in the Object scope. 
+类是静态，对象是动态
+
+ Composite is often used with Iterator or Visitor.
+ 像是mixin?
+ 设计模式如何解决问题?
+Requests are the only way to get an object to execute an operation. Operations 
+are the only way to change an object's internal data. Because of these restrictions, 
+the object's internal state is said to be encapsulated; it cannot be accessed 
+directly, and its representation is invisible from outside the object. 
+所以这样才有getter and setter吗?
+The hard part about object-oriented design is decomposing a system into objects. 
+The task is difficult because many factors come into play: encapsulation, 
+granularity, dependency, flexibility, performance, evolution, reusability, and 
+on and on. They all influence the decomposition, often in conflicting ways. 
+
+Object-oriented design methodologies favor many different approaches. You can 
+write a problem statement, single out the nouns and verbs, and create corresponding 
+classes and operations. Or you can focus on the collaborations and responsibilities 
+in your system. Or you can model the real world and translate the objects found 
+during analysis into design. There will always be disagreement on which approach 
+is best.
+
