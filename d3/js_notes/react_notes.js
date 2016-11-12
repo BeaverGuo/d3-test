@@ -136,3 +136,275 @@ inputOnClick(e){
 	e.target.focus();
     e.target.setSelectionRange(7,e.target.value.length);
 }
+
+4.
+this.props.dispatch() doesn't guarantee that you will have proper values in this.props.pets_options immediately after dispatch call. If you want to do something with new props values you have to use componentWillReceiveProps lifecycle method.
+
+componentWillReceiveProps(nextProps) {
+    this.setState({pets_options: nextProps.pets_options})
+}
+//不能立即生效
+handleClick(index,rks){
+    if(index == 1){
+      let itemsToDo = this.check.check(this.props.itemsToDo);
+      if(!itemsToDo.length){
+        message.info('不存在分项工程');
+        return ;
+      }
+      if(!rks.length){
+        message.info('请选择分项工程');
+        return ;
+      }
+      let v = [];
+      rks.map((val)=>{
+        v.push(itemsToDo[val]);
+      });
+      this.props.onFilterItemTodo(v);
+      //console.log(this.props);
+      
+      this.updateList(v);
+      this.setState({current:1});
+    }
+    else{
+
+    }
+  }
+  updateList(v){
+
+    let itemsToDo = v ? v : this.check.check(this.props.filteredItemsTodo);
+    this.check.pArrHelper(itemsToDo,'wp',Api,'getCode',true).then((val)=>{
+      //console.log(val);
+      let res = [];
+      val.map((item)=>{
+        res = res.concat(this.check.dataFormat(item.children_wp,false,false,`${item.code} ${item.name}/${item.pk}`,item.related_documents));
+      });
+      //console.log("res",res);
+      this.props.onSetItemsToDoChildren(res);
+    });
+  }
+
+
+//remove duplicate items with same prop in an array
+uniq(a,prop) {
+  var seen = {};
+  var out = [];
+  var len = a.length;
+  var j = 0;
+  for(var i = 0; i < len; i++) {
+       var propVal = a[i][prop];
+       if(seen[propVal] !== 1) {
+             seen[propVal] = 1;
+             out[j++] = a[i];
+       }else{
+          out.map((val)=>{
+            if(val[prop] == propVal)
+              val.quantity = Number(val.quantity) + Number(a[i].quantity);
+            return val;
+          });
+       }
+  }
+  return out;
+}
+
+//reducer,actions应该把某一类操作写在一起,如设置数据,增删改查
+case SET_DATA:
+  switch(action.name){
+    case 'partData':
+    return state.set('partData',action.data);
+    break;
+    case 'divData':
+    return state.set('divData',action.data);
+    break;
+    case 'cellData':
+    let tmpArr = [];
+    action.data.map((dat)=>{
+      tmpArr = tmpArr.concat(dat.children_wp);
+    });
+    tmpArr.map((val)=>{
+      val.key = val.pk+"/"+val.code+"/"+val.name;
+      return val;
+    });
+    let cellToSelState = state.set('cellToSel',tmpArr);
+    return cellToSelState.set('cellData',action.data);
+    default:
+    return state;
+    break;
+  }
+
+
+  //event pass
+  class TableManagementView extends React.Component {
+    constructor(props) {
+    super(props);
+    this.state = {
+      data:data,
+      selectedRowKeys:[],
+      show:false,
+    }
+    var saveTable = document.createEvent('Event');
+    saveTable.initEvent('tableSaveClick', true, false);
+    window.saveTable = saveTable;
+  }
+  handleSave(){
+    document.dispatchEvent(window.saveTable);
+  }
+  componentWillUnmount(){
+    //remove event
+  }
+    componentWillMount(){
+
+    }
+    componentWillReceiveProps(nextProps){
+      if(nextProps.params.id!=this.props.params.id){
+      this.setState({show:false});
+      }
+    }
+  onSelectChange(selectedRowKeys) {
+      this.setState({ selectedRowKeys }); 
+  }
+  showList(){
+    this.setState({show:true});
+  }
+  hideList(){
+    this.setState({show:false});
+  }
+  deleteRow(record){
+        let index=this.state.data.indexOf(record);
+     
+        if(index!=null&&index!=undefined){
+            this.state.data.splice(index,1);
+            this.state.data.map((item,i)=>{
+                item.key=i+1;
+                item.index=i+1;
+              }
+            ); 
+        }
+        this.forceUpdate();
+  }
+  render() {
+    const columns= [
+      {
+        title: '序号',
+        dataIndex: 'index',
+        width:60
+      },{
+        title: '编号',
+        dataIndex: 'code',
+        width:200
+      }, {
+        title: '表格名称',
+        dataIndex: 'name',
+          render: (text,item) => <span title={text}>{text}</span>,
+
+      }, {
+          title: '',
+            render: (text,record) =>
+            <Popconfirm title="确定要删除这个表单吗？" onConfirm={this.deleteRow.bind(this,record)}>
+                <a title='删除'> <Icon type="delete" ></Icon></a>
+            </Popconfirm> ,
+        width:150
+      }
+    ];
+    const { selectedRowKeys } = this.state;
+      const rowSelection = {
+        selectedRowKeys,
+        onChange: this.onSelectChange.bind(this),
+      };
+    return (
+      <div>
+        <div className={styles[this.state.show!=true?'show':'hide']}>
+            <h3>{this.props.params.id}</h3>
+          <Affix  offsetTop={20} target={() => document.getElementById('affix-target')}>
+            <div style={{float:'right',marginRight:5}}>
+              <Badge dot >
+                <Button onClick={this.showList.bind(this)} title='显示提交列表' style={{border: '1px solid #41addd',fontSize:18,color: '#57c5f7',float:'right',marginRight:8}} shape="circle" icon="bars" />
+              </Badge>
+            </div>
+            <Button title='添加到提交列表' style={{border: '1px solid #41addd',fontSize:18,color: '#57c5f7',float:'right',marginRight:8}} shape="circle" icon="plus-square-o" ></Button>
+            <Button title='保存' onClick={()=>this.handleSave()} style={{border: '1px solid #41addd',fontSize:18,color: '#57c5f7',float:'right',marginRight:8}} shape="circle" icon="save" />
+          </Affix>
+              <UpdatedQualityCheckContent />
+        </div>
+        <div  className={styles[this.state.show==true?'show':'hide']}>
+            <h3>{'表单批处理'}</h3>
+          <Button onClick={this.hideList.bind(this)} title='返回表单填写' style={{border: '1px solid #41addd',fontSize:18,color: '#57c5f7',float:'right',marginRight:30,marginBottom: 20}} shape="circle" icon="rollback" />
+          <Table style={{clear:'both',marginTop:20}}  bordered rowSelection={rowSelection} columns={columns} dataSource={this.state.data} pagination={false} scroll={{y: 430 }} size='middle'/>
+          <div style={{bottom:-80,position: 'relative'}}>
+            <FlowInfo  bToProcessData={1}/>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+class QualityCheckContent extends Component{
+    constructor(props) {
+        super(props);
+        this.check = new CheckObj();
+        this.state = {
+            tabIndex:"14",
+            suffix:"",
+            isOPenListBox:true,
+            isShowPDF:false,
+            url:"",
+        };
+        this.tableSaveClick = this.tableSaveClick.bind(this);
+        document.addEventListener("tableSaveClick",this.tableSaveClick,false);
+    }
+    handleClick(e){
+        console.log(e);
+        let str = e.name.slice(-1),
+            suffix = "";
+        if(Number(str)){
+            if(e.state[Number(str)-1]==2){
+                message.info("该质量表单已被创建!");
+                return;
+            }
+            suffix = str;
+        }
+        this.setState({
+            tabIndex:e.serial_code,
+            isOPenListBox: false,
+            suffix:suffix
+        });
+    }
+    tableSaveClick(){
+        console.log('here...');
+    }
+    //.....
+}
+
+
+/*event parameters
+
+If you make "x" a global variable, it will solve your problem. Perhaps you are looking for event.detail
+
+new CustomEvent('eventName', {'detail': data})
+Instead of data use x and in event listenener you can access x using event.detail
+*/
+function getSelectionBounds() {
+  var x =(bounds["x"].toFixed(2));
+ var y=  "xyz";
+  var selectionFired = new CustomEvent("selectionFired",{ "detail": {"x":x,"y":y }});
+
+  document.dispatchEvent(selectionFired);
+};
+
+document.addEventListener("selectionFired", function (e) {
+  alert(e.detail.x+"   "+e.detail.y);
+});
+
+
+Yes, you can use a MessageEvent or a CustomEvent.
+
+Example usage:
+
+//Listen for the event
+window.addEventListener("MyEventType", function(evt) {
+    alert(evt.detail);
+}, false);
+
+//Dispatch an event
+var evt = document.createEvent("CustomEvent");
+evt.initCustomEvent("MyEventType", true, true, "Any Object Here");
